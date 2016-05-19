@@ -4,8 +4,8 @@ import matplotlib.pyplot
 from tcp import *
 
 NUM_BYTES = 100000
-A_VALS = (0.05, 0.10, 0.15, 0.20, 0.25, 0.40, 0.45, 0.50)
-colormap = {0.05: "b", 0.10: "g", 0.15: "r", 0.20: "c", 0.25: "m", 0.40: "y", 0.45: "dimgray", 0.50 : "k"}
+A_VALS = ("packetloss/jack-3-hours-50-60-histo", "packetloss/jack-3-hours-11-21-histo", "packetloss/jack-3-hours-0-70-histo", "packetloss/far-2-hours-20-30-histo", "packetloss/far-2-hours-0-35-histo")#), 0.40, 0.45, 0.50)
+colormap = {0.01: "b", 0.10: "g", 0.20: "r", 0.30: "c", 0.40: "m", 0.50: "y", 0.60: "dimgray", 0.70 : "k", "packetloss/jack-3-hours-50-60-histo": "b", "packetloss/jack-3-hours-11-21-histo": "g", "packetloss/jack-3-hours-0-70-histo": "r", "packetloss/far-2-hours-20-30-histo": "c", "packetloss/far-2-hours-0-35-histo": "m"}
 R_VALS = tuple(xrange(1, 16))
 D = 100
 f = 12
@@ -39,7 +39,10 @@ if __name__ == "__main__":
     curves = []
     for a in A_VALS:
         print "a = {0}".format(a)
-        set_loss_rate(a)
+        if isinstance(a, int) or isinstance(a, float):
+            set_loss_rate(a)
+        else:
+            load_runs(a)
         def EXraw(r):
             reset_frame_tries()
             tcp_transmit(l, r, h, NUM_BYTES, TCP_WINDOW, D, f)

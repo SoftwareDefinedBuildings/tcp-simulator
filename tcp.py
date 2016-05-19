@@ -24,7 +24,8 @@ def set_cr(newcr):
     cr = newcr
 
 def set_loss_rate(lossrate):
-    global a
+    global a, useruns
+    useruns = False
     a = lossrate
 
 frame_tries = 0
@@ -35,13 +36,51 @@ def reset_frame_tries():
 def get_frame_tries():
     return frame_tries
 
+leftinrun = 0
+runs = {}
+runsum = 0
+useruns = False
+def load_runs(filepath):
+    global runs, runsum, leftinrun, useruns
+    useruns = True
+    runs = {}
+    runsum = 0
+    with open(filepath) as f:
+        for line in f:
+            runlen, freq = line.split(',')
+            runlen = int(runlen)
+            freq = int(freq)
+            runs[runlen] = freq
+            runsum += freq
+    leftinrun = choose_new_run()
+
+def choose_new_run():
+    fnum = random.random() * runsum
+    num = int(fnum)
+    i = 0
+    sofar = 0
+    while True:
+        if i in runs:
+            sofar += runs[i]
+            if sofar > num:
+                return i
+        i += 1
+
 def frame_transmit_once():
     """ Simulates transmission of a single 802.15.4 frame. Returns
         True if the retransmission succeeds, or False if it fails.
     """
-    global frame_tries
+    global frame_tries, leftinrun
     frame_tries += 1
-    return random.random() >= a
+    if useruns:
+        if leftinrun == 1:
+            leftinrun = choose_new_run()
+            return True
+        else:
+            leftinrun -= 1
+            return False
+    else:
+        return random.random() >= a
 
 def mac_transmit_once():
     """ Simulates the transmission of an 802.15.4 frame and the ACK
